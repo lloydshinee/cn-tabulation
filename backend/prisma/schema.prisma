@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  JUDGE
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  fullName String
+  username String  @unique
+  password String
+  imageSrc String?
+  role     Role
+  scores   Score[]
+}
+
+model Team {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  imageSrc    String?
+  scores      Score[]
+}
+
+model Portion {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  criterias   Criteria[]
+}
+
+model Criteria {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  weight     Int
+  portion    Portion     @relation(fields: [portionId], references: [id], onDelete: Cascade)
+  portionId  Int
+  criterions Criterion[]
+}
+
+model Criterion {
+  id          Int      @id @default(autoincrement())
+  description String
+  weight      Int
+  criteriaId  Int
+  criteria    Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  scores      Score[]
+}
+
+model Score {
+  id          Int       @id @default(autoincrement())
+  value       Float
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  teamId      Int
+  team        Team      @relation(fields: [teamId], references: [id])
+  criterionId Int
+  criterion   Criterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+}
