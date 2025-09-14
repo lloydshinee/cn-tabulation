@@ -25,12 +25,19 @@ export default function CriteriaControl() {
   const criteriasByPortion = useCriteriasByPortions(portionIds);
 
   return (
-    <Accordion type="multiple" className="w-full space-y-4 bg-card rounded-lg">
+    <Accordion
+      type="multiple"
+      className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
+    >
       {scoring.portions.map((portion: any) => {
         const criterias = criteriasByPortion[portion.id] || [];
 
         return (
-          <AccordionItem key={portion.id} value={`portion-${portion.id}`}>
+          <AccordionItem
+            key={portion.id}
+            value={`portion-${portion.id}`}
+            className="bg-card rounded-lg border-l-2 border-l-green-500 w-full"
+          >
             <AccordionTrigger className="px-4 py-2">
               <div className="flex flex-col items-start text-left w-full">
                 <CardTitle className="text-base font-semibold">
