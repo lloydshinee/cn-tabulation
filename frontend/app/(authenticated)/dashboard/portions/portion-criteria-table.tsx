@@ -2,7 +2,6 @@ import { BACKEND_URL, Criteria, Criterion } from "@/lib/globals";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import {
-  Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,

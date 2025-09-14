@@ -10,9 +10,16 @@ import {
 } from "react";
 import { io, Socket } from "socket.io-client";
 
+// --- Types ---
+interface PortionState {
+  id: number;
+  name: string;
+  hiddenCriterias: (string | number)[];
+}
+
 interface ScoringState {
-  teams: string[]; // multiple teams
-  portions: string[]; // multiple portions
+  teams: string[];
+  portions: PortionState[];
   start: boolean;
 }
 
@@ -25,11 +32,13 @@ interface ScoringContextType {
   scoring: ScoringState;
   toggleScoring: () => void;
   setTeams: (teams: string[]) => void;
-  setPortions: (portions: string[]) => void;
+  setPortions: (portions: PortionState[]) => void;
   addTeam: (team: string) => void;
   removeTeam: (team: string) => void;
-  addPortion: (portion: string) => void;
-  removePortion: (portion: string) => void;
+  addPortion: (portionId: number, name: string) => void;
+  removePortion: (portionId: number) => void;
+  hideCriteria: (portionId: number, criterionId: number | string) => void;
+  showCriteria: (portionId: number, criterionId: number | string) => void;
   judges: Judge[];
   socket: Socket | null;
 }
@@ -46,7 +55,7 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
   user,
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [scoring, setScoringState] = useState<ScoringState>({
+  const [scoring, setScoring] = useState<ScoringState>({
     teams: [],
     portions: [],
     start: false,
@@ -67,17 +76,19 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
 
     setSocket(s);
 
+    // --- Connection Events ---
     s.on("connect", () => {
       console.log(`⚡ Connected as ${user.role} →`, s.id);
     });
 
-    s.on("reconnect", (attempt) => {
-      console.log("Judge reconnected after", attempt, "attempts");
+    s.on("disconnect", () => {
+      console.log("🔌 Disconnected");
     });
 
+    // --- Custom Events ---
     s.on("scoringState", (data: ScoringState) => {
       console.log("📡 Received scoring state:", data);
-      setScoringState(data);
+      setScoring(data);
     });
 
     s.on("judgesList", (list: Judge[]) => {
@@ -88,9 +99,9 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
     return () => {
       s.disconnect();
     };
-  }, []);
+  }, [user]);
 
-  // --- Actions (Admins only) ---
+  // --- Admin Actions ---
   const toggleScoring = () => {
     if (!socket || user.role !== "ADMIN") return;
     socket.emit("updateScoring", { start: !scoring.start });
@@ -101,7 +112,7 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
     socket.emit("updateScoring", { teams });
   };
 
-  const setPortions = (portions: string[]) => {
+  const setPortions = (portions: PortionState[]) => {
     if (!socket || user.role !== "ADMIN") return;
     socket.emit("updateScoring", { portions });
   };
@@ -118,18 +129,57 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
     socket.emit("updateScoring", { teams: updated });
   };
 
-  const addPortion = (portion: string) => {
+  const addPortion = (portionId: number, name: string) => {
     if (!socket || user.role !== "ADMIN") return;
-    const updated = [...new Set([...scoring.portions, portion])];
+
+    const exists = scoring.portions.some((p) => p.id === portionId);
+    const updated = exists
+      ? scoring.portions
+      : [...scoring.portions, { id: portionId, name, hiddenCriterias: [] }];
+
     socket.emit("updateScoring", { portions: updated });
   };
 
-  const removePortion = (portion: string) => {
+  const removePortion = (portionId: number) => {
     if (!socket || user.role !== "ADMIN") return;
-    const updated = scoring.portions.filter((p) => p !== portion);
+    const updated = scoring.portions.filter((p) => p.id !== portionId);
     socket.emit("updateScoring", { portions: updated });
   };
 
+  const hideCriteria = (portionId: number, criterionId: number | string) => {
+    if (!socket || user.role !== "ADMIN") return;
+
+    const updated = scoring.portions.map((p) =>
+      p.id === portionId
+        ? {
+            ...p,
+            hiddenCriterias: [...new Set([...p.hiddenCriterias, criterionId])],
+          }
+        : p
+    );
+
+    socket.emit("updateScoring", { portions: updated });
+    console.log(`🙈 Hid criterion ${criterionId} in portion ${portionId}`);
+  };
+
+  // --- Show (unhide) a criterion inside a portion ---
+  const showCriteria = (portionId: number, criterionId: number | string) => {
+    if (!socket || user.role !== "ADMIN") return;
+
+    const updated = scoring.portions.map((p) =>
+      p.id === portionId
+        ? {
+            ...p,
+            hiddenCriterias: p.hiddenCriterias.filter((c) => c !== criterionId),
+          }
+        : p
+    );
+
+    socket.emit("updateScoring", { portions: updated });
+    console.log(`👁️ Shown criterion ${criterionId} in portion ${portionId}`);
+  };
+
+  // --- Context Value ---
   const value: ScoringContextType = {
     scoring,
     toggleScoring,
@@ -139,6 +189,8 @@ export const ScoringProvider: React.FC<ScoringProviderProps> = ({
     removeTeam,
     addPortion,
     removePortion,
+    hideCriteria, // 👈 now aware of hidden criterias
+    showCriteria,
     judges,
     socket,
   };

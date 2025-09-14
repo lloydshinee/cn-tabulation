@@ -45,7 +45,7 @@ async function JudgesList() {
         ))}
       </div>
     );
-  } catch (error) {
+  } catch (error: any) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">Failed to load judges</p>

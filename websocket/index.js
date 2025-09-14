@@ -25,8 +25,8 @@ const connections = {
 
 // updated scoring state → arrays
 let scoringState = {
-  teams: [], // multiple team IDs
-  portions: [], // multiple portion IDs
+  teams: [],
+  portions: [], // { id, name, hiddenCriterias: [] }
   start: false,
 };
 
@@ -64,7 +64,25 @@ io.on("connection", (socket) => {
       // Stop scoring → reset everything
       scoringState = { teams: [], portions: [], start: false };
     } else {
-      scoringState = { ...scoringState, ...data };
+      // Ensure portions are normalized to { id, hiddenCriterias }
+      if (Array.isArray(data.portions)) {
+        scoringState.portions = data.portions.map((p) =>
+          typeof p === "object"
+            ? {
+                id: p.id,
+                name: p.name || "", // 👈 preserve name
+                hiddenCriterias: p.hiddenCriterias || [],
+              }
+            : { id: p, name: "", hiddenCriterias: [] }
+        );
+      }
+
+      // Merge other keys like teams/start
+      scoringState = {
+        ...scoringState,
+        ...data,
+        portions: scoringState.portions, // keep normalized
+      };
 
       // If no portions, clear teams too
       if (scoringState.portions.length === 0) {

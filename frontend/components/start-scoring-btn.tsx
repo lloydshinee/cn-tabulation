@@ -16,7 +16,7 @@ import {
 import { useScoring } from "@/providers/ScoringProvider";
 
 export default function StartScoringButton() {
-  const { scoring, toggleScoring, setTeam, setPortion } = useScoring();
+  const { scoring, toggleScoring } = useScoring();
 
   return (
     <AlertDialog>

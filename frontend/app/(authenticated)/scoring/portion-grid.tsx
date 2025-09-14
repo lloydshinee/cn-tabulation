@@ -1,19 +1,22 @@
 // components/portion-grid.tsx
 "use client";
+
 import { usePortion } from "@/hooks/use-portion";
 import { useCriterias } from "@/hooks/use-criteria";
 import CriteriaCard from "./criteria-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useScoring } from "@/providers/ScoringProvider";
 
 interface PortionGridProps {
-  portionId: string;
+  portionId: number;
   teamId: string | null;
 }
 
 export default function PortionGrid({ portionId, teamId }: PortionGridProps) {
   const currentPortion = usePortion(portionId);
   const criterias = useCriterias(currentPortion?.id || 0);
+  const { scoring } = useScoring();
 
   if (!currentPortion) {
     return (
@@ -39,8 +42,17 @@ export default function PortionGrid({ portionId, teamId }: PortionGridProps) {
     );
   }
 
+  // find hidden criterias for this portion
+  const portionState = scoring.portions.find(
+    (p: any) => p.id === currentPortion.id
+  );
+  const hidden = portionState?.hiddenCriterias || [];
+
+  // filter out hidden criterias
+  const visibleCriterias = criterias.filter((c) => !hidden.includes(c.id));
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" id={`team-${teamId}-portion-${portionId}`}>
       <Card className="mb-8">
         <CardHeader className="text-center pb-4">
           <div className="space-y-2 pb-10">
@@ -56,16 +68,23 @@ export default function PortionGrid({ portionId, teamId }: PortionGridProps) {
               </p>
             )}
           </div>
+
           {/* Criteria Grid */}
           {teamId && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {criterias.map((criteria) => (
-                <CriteriaCard
-                  key={criteria.id}
-                  criteria={criteria}
-                  teamId={teamId}
-                />
-              ))}
+              {visibleCriterias.length > 0 ? (
+                visibleCriterias.map((criteria) => (
+                  <CriteriaCard
+                    key={criteria.id}
+                    criteria={criteria}
+                    teamId={teamId}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center text-muted-foreground">
+                  All criterias are hidden
+                </div>
+              )}
             </div>
           )}
         </CardHeader>

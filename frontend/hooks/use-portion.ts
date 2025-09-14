@@ -4,7 +4,7 @@ import { Portion } from "@/lib/globals";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export function usePortion(name: string | null) {
+export function usePortion(name: number | null) {
   const [currentPortion, setCurrentPortion] = useState<Portion | null>(null);
 
   const fetchPortion = async () => {

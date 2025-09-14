@@ -3,6 +3,7 @@
 import { useScoring } from "@/providers/ScoringProvider";
 import ScoringHeader from "./scoring-header";
 import ScoringGrid from "./scoring-grid";
+import ScoringMenu from "@/components/scoring-menu";
 
 export default function ScoringPage() {
   const { scoring } = useScoring();
@@ -15,6 +16,7 @@ export default function ScoringPage() {
           <ScoringGrid teamId={team} key={team} />
         ))}
       </div>
+      <ScoringMenu />
     </div>
   );
 }

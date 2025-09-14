@@ -37,7 +37,7 @@ function SelectedTeam({ id }: { id: string }) {
   );
 }
 
-function SelectedPortion({ id }: { id: string }) {
+function SelectedPortion({ id }: { id: number }) {
   const portion = usePortion(id);
 
   if (!portion) return null;
@@ -113,8 +113,8 @@ export default function ScoringState() {
             <p className="text-xs text-muted-foreground mb-1">Portions</p>
             {scoring.portions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {scoring.portions.map((id) => (
-                  <SelectedPortion key={id} id={id} />
+                {scoring.portions.map((portion) => (
+                  <SelectedPortion key={portion.id} id={portion.id} />
                 ))}
               </div>
             ) : (

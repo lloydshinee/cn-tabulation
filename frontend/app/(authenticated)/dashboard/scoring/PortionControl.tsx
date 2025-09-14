@@ -8,7 +8,7 @@ import { useScoring } from "@/providers/ScoringProvider";
 import { Check } from "lucide-react";
 
 interface Portion {
-  id: string;
+  id: number;
   name: string;
   description?: string;
 }
@@ -31,11 +31,13 @@ export default function PortionControl() {
     fetchPortions();
   }, []);
 
-  const handlePortionClick = (portionId: string) => {
-    if (scoring.portions.includes(portionId)) {
+  const handlePortionClick = (portionId: number, name: string) => {
+    const isActive = scoring.portions.some((p) => p.id === portionId);
+
+    if (isActive) {
       removePortion(portionId); // deactivate
     } else {
-      addPortion(portionId); // activate
+      addPortion(portionId, name); // activate
     }
   };
 
@@ -53,11 +55,12 @@ export default function PortionControl() {
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {portions.map((portion) => {
-            const isActive = scoring.portions.includes(portion.id);
+            const isActive = scoring.portions.some((p) => p.id === portion.id);
+
             return (
               <Button
                 key={portion.id}
-                onClick={() => handlePortionClick(portion.id)}
+                onClick={() => handlePortionClick(portion.id, portion.name)}
                 variant={isActive ? "default" : "outline"}
                 disabled={!scoring.start}
                 size="sm"

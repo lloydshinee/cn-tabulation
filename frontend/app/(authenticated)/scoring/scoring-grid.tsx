@@ -28,7 +28,7 @@ export default function ScoringGrid({ teamId }: ScoringGridProps) {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12" id={`team-${teamId}`}>
       {/* Portion + Team Info Card */}
       {currentTeam && (
         <div className="flex flex-col items-center gap-4 border-t pt-6">
@@ -53,8 +53,8 @@ export default function ScoringGrid({ teamId }: ScoringGridProps) {
           </div>
         </div>
       )}
-      {scoring.portions.map((portionId) => (
-        <PortionGrid key={portionId} portionId={portionId} teamId={teamId} />
+      {scoring.portions.map((portion) => (
+        <PortionGrid key={portion.id} portionId={portion.id} teamId={teamId} />
       ))}
     </div>
   );
