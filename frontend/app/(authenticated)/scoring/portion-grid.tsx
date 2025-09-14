@@ -51,6 +51,8 @@ export default function PortionGrid({ portionId, teamId }: PortionGridProps) {
   // filter out hidden criterias
   const visibleCriterias = criterias.filter((c) => !hidden.includes(c.id));
 
+  if (visibleCriterias.length === 0) return;
+
   return (
     <div className="space-y-6" id={`team-${teamId}-portion-${portionId}`}>
       <Card className="mb-8">
@@ -71,20 +73,13 @@ export default function PortionGrid({ portionId, teamId }: PortionGridProps) {
 
           {/* Criteria Grid */}
           {teamId && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {visibleCriterias.length > 0 ? (
+            <div className="flex flex-wrap flex-col md:flex-row gap-6">
+              {visibleCriterias.length > 0 &&
                 visibleCriterias.map((criteria) => (
-                  <CriteriaCard
-                    key={criteria.id}
-                    criteria={criteria}
-                    teamId={teamId}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center text-muted-foreground">
-                  All criterias are hidden
-                </div>
-              )}
+                  <div className="flex-1" key={criteria.id}>
+                    <CriteriaCard criteria={criteria} teamId={teamId} />
+                  </div>
+                ))}
             </div>
           )}
         </CardHeader>

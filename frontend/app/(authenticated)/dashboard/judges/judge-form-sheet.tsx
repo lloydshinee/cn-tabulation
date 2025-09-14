@@ -19,7 +19,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { User } from "next-auth";
-import Image from "next/image";
 
 const UPLOAD_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`;
 const JUDGE_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/judges`;
@@ -162,12 +161,10 @@ export default function JudgeFormSheet({ data }: { data?: User }) {
               <div className="relative w-full">
                 <div className="h-full w-full overflow-hidden border border-gray-300 bg-gray-100 rounded-lg">
                   {imagePreview ? (
-                    <Image
+                    <img
                       src={imagePreview}
                       alt="Judge image"
                       className="h-full w-full max-h-40 object-cover"
-                      height={20}
-                      width={20}
                     />
                   ) : (
                     <div className="flex w-full h-40 items-center justify-center text-gray-400">

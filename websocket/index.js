@@ -83,11 +83,6 @@ io.on("connection", (socket) => {
         ...data,
         portions: scoringState.portions, // keep normalized
       };
-
-      // If no portions, clear teams too
-      if (scoringState.portions.length === 0) {
-        scoringState.teams = [];
-      }
     }
 
     console.log("✅ Updated scoring state:", scoringState);

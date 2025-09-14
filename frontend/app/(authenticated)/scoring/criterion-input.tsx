@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { BACKEND_URL, Criterion } from "@/lib/globals";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useScoring } from "@/providers/ScoringProvider";
 
 interface CriterionInputProps {
   criterion: Criterion;
@@ -20,7 +19,6 @@ export default function CriterionInput({
   const [loading, setLoading] = useState(false);
 
   const session = useSession();
-  const { scoring } = useScoring();
 
   const handleScoreChange = (value: string) => {
     if (
@@ -98,7 +96,7 @@ export default function CriterionInput({
     <div className="flex items-center gap-4 p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
       <div className="flex-1 min-w-0 flex flex-col items-start">
         <p className="font-medium text-sm leading-tight mb-1">
-          {criterion.description}
+          {criterion.name}
         </p>
         {criterion.weight !== 100 && (
           <p className="text-xs text-muted-foreground">

@@ -2,12 +2,13 @@ import prisma from "../prisma/client.js";
 
 // Create a criterion
 export const createCriterion = async (req, res) => {
-  const { description, weight, criteriaId } = req.body;
+  const { description, weight, criteriaId, name } = req.body;
   try {
     const criterion = await prisma.criterion.create({
       data: {
+        name,
         description,
-        weight,
+        weight: parseFloat(weight),
         criteriaId,
       },
     });
@@ -37,11 +38,11 @@ export const getCriterionById = async (req, res) => {
 // Update a criterion
 export const updateCriterion = async (req, res) => {
   const { id } = req.params;
-  const { description, weight } = req.body;
+  const { description, weight, name } = req.body;
   try {
     const criterion = await prisma.criterion.update({
       where: { id: Number(id) },
-      data: { description, weight },
+      data: { description, weight: parseFloat(weight), name },
     });
     res.json(criterion);
   } catch (error) {

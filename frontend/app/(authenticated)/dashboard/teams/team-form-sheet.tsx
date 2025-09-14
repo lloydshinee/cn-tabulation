@@ -162,12 +162,10 @@ export default function TeamFormSheet({ data }: { data?: Team }) {
               <div className="relative w-full">
                 <div className="h-full w-full overflow-hidden border border-gray-300 bg-gray-100 rounded-lg">
                   {imagePreview ? (
-                    <Image
+                    <img
                       src={imagePreview}
                       alt="Team image"
                       className="h-full w-full max-h-40 object-cover"
-                      height={20}
-                      width={20}
                     />
                   ) : (
                     <div className="flex w-full h-40 items-center justify-center text-gray-400">

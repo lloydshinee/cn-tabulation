@@ -10,12 +10,14 @@ export interface Portion {
 export interface Criteria {
   id: number;
   name: string;
+  description: string;
   weight: number;
   portionId: number;
 }
 
 export interface Criterion {
   id: number;
+  name: string;
   description: string;
   weight: number;
   criteriaId: number;

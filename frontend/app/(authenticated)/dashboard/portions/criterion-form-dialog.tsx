@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Criterion } from "@/lib/globals";
+import { Textarea } from "@/components/ui/textarea";
 
 const CRITERION_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/criterion`;
 
@@ -29,22 +30,33 @@ export default function CriterionFormDialog({
   data?: Criterion;
   criteriaId: number;
 }) {
+  const [name, setName] = useState<string>(data?.name ?? "");
   const [description, setDescription] = useState<string>(
     data?.description ?? ""
   );
-  const [weight, setWeight] = useState<number>(data?.weight ?? 0);
+  const [weight, setWeight] = useState<string>(data?.weight.toString() ?? "");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const handleWeightChange = (value: string) => {
+    if (
+      value === "" ||
+      (/^\d*\.?\d*$/.test(value) && parseFloat(value) <= 100)
+    ) {
+      setWeight(value);
+    }
+  };
+
   useEffect(() => {
     if (data) {
-      setDescription(data.description);
-      setWeight(data.weight);
+      setName(data.name);
+      setDescription(data.description || "");
+      setWeight(data.weight.toString());
     }
   }, [data]);
 
   const handleSubmit = async () => {
-    if (!description || !weight) {
+    if (!name || !weight) {
       toast.error("Fields are required.");
       return;
     }
@@ -53,6 +65,7 @@ export default function CriterionFormDialog({
 
     try {
       const criterionPayload = {
+        name,
         description,
         weight,
         criteriaId,
@@ -68,8 +81,9 @@ export default function CriterionFormDialog({
         toast.success("Criterion created successfully!");
 
         // Reset form
+        setName("");
         setDescription("");
-        setWeight(0);
+        setWeight("");
       }
 
       router.refresh();
@@ -118,10 +132,21 @@ export default function CriterionFormDialog({
             <Label htmlFor="criterion-name">Description</Label>
             <Input
               id="criterion-name"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              inputMode="decimal"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter criterion name"
               required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="criterion-description">Description</Label>
+            <Textarea
+              id="criterion-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter criterion description"
             />
           </div>
           <div className="grid gap-2">
@@ -129,8 +154,9 @@ export default function CriterionFormDialog({
             <Input
               id="criterion-weight"
               value={weight}
-              type="number"
-              onChange={(e) => setWeight(parseInt(e.target.value))}
+              type="text"
+              inputMode="decimal"
+              onChange={(e) => handleWeightChange(e.target.value)}
               placeholder="Enter criterion weight"
             />
           </div>

@@ -55,6 +55,7 @@ export default async function PortionCriteriaTable({
               <thead className="bg-muted-foreground/10">
                 <tr>
                   <th className="w-16 px-2 py-1 text-left font-mono">ID</th>
+                  <th className="px-2 py-1 text-left">Name</th>
                   <th className="px-2 py-1 text-left">Description</th>
                   <th className="px-2 py-1 text-left">Weight</th>
                   <th className="w-24 px-2 py-1 text-left">Actions</th>
@@ -67,7 +68,10 @@ export default async function PortionCriteriaTable({
                       {criterion.id}
                     </td>
                     <td className="px-2 py-1 font-medium">
-                      {criterion.description || "Unnamed"}
+                      {criterion.name || "Unnamed"}
+                    </td>
+                    <td className="px-2 py-1 font-medium max-w-3xs truncate">
+                      {criterion.description || "No description"}
                     </td>
                     <td className="px-2 py-1">{criterion.weight}%</td>
                     <td className="px-2 py-1">

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Criteria } from "@/lib/globals";
+import { Textarea } from "@/components/ui/textarea";
 
 const CRITERIA_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/criteria`;
 
@@ -30,14 +31,27 @@ export default function CriteriaFormDialog({
   portionId: number;
 }) {
   const [name, setName] = useState<string>(data?.name ?? "");
-  const [weight, setWeight] = useState<number>(data?.weight ?? 0);
+  const [description, setDescription] = useState<string>(
+    data?.description ?? ""
+  );
+  const [weight, setWeight] = useState<string>(data?.weight.toString() ?? "");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleWeightChange = (value: string) => {
+    if (
+      value === "" ||
+      (/^\d*\.?\d*$/.test(value) && parseFloat(value) <= 100)
+    ) {
+      setWeight(value);
+    }
+  };
 
   useEffect(() => {
     if (data) {
       setName(data.name);
-      setWeight(data.weight);
+      setDescription(data.description ?? "");
+      setWeight(data.weight.toString());
     }
   }, [data]);
 
@@ -52,6 +66,7 @@ export default function CriteriaFormDialog({
     try {
       const criteriaPayload = {
         name,
+        description,
         weight,
         portionId,
       };
@@ -67,7 +82,8 @@ export default function CriteriaFormDialog({
 
         // Reset form
         setName("");
-        setWeight(0);
+        setDescription("");
+        setWeight("");
       }
 
       router.refresh();
@@ -124,12 +140,22 @@ export default function CriteriaFormDialog({
             />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="criteria-description">Description</Label>
+            <Textarea
+              id="criteria-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter criteria description"
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="criteria-weight">Weight</Label>
             <Input
               id="criteria-weight"
+              inputMode="decimal"
               value={weight}
-              type="number"
-              onChange={(e) => setWeight(parseInt(e.target.value))}
+              type="text"
+              onChange={(e) => handleWeightChange(e.target.value)}
               placeholder="Enter criteria weight"
             />
           </div>

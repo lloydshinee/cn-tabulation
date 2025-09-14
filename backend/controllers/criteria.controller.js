@@ -2,10 +2,10 @@ import prisma from "../prisma/client.js";
 import { computeCriteriaScoreForTeam } from "../utils/compute.js";
 
 export const createCriteria = async (req, res) => {
-  const { name, weight, portionId } = req.body;
+  const { name, weight, portionId, description } = req.body;
   try {
     const criteria = await prisma.criteria.create({
-      data: { name, weight, portionId },
+      data: { name, weight: parseFloat(weight), portionId, description },
     });
     res.json(criteria);
   } catch (error) {
@@ -19,18 +19,17 @@ export const getCriteriaById = async (req, res) => {
   const criteria = await prisma.criteria.findMany({
     where: { portionId: Number(id) },
   });
-  if (!criteria) return res.status(404).json({ error: "Criteria not found" });
   res.json(criteria);
 };
 
 export const updateCriteria = async (req, res) => {
   const { id } = req.params;
-  const { name, weight } = req.body;
+  const { name, weight, description } = req.body;
 
   try {
     const criteria = await prisma.criteria.update({
       where: { id: Number(id) },
-      data: { name, weight },
+      data: { name, weight: parseFloat(weight), description },
     });
 
     res.json(criteria);
