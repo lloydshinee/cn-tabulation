@@ -25,7 +25,7 @@ export default function CriteriaControl() {
   const criteriasByPortion = useCriteriasByPortions(portionIds);
 
   return (
-    <Accordion type="multiple" className="w-full space-y-5 bg-card rounded-lg">
+    <Accordion type="multiple" className="w-full space-y-4 bg-card rounded-lg">
       {scoring.portions.map((portion: any) => {
         const criterias = criteriasByPortion[portion.id] || [];
 
@@ -61,12 +61,12 @@ export default function CriteriaControl() {
                       variant="ghost"
                       className={`
                             rounded-lg border w-full sm:w-[10rem] md:w-[12rem]
-                            flex flex-col items-start gap-1
+                            flex flex-col items-start gap-1 hover:bg-none
                             overflow-hidden text-left p-3
                             ${
-                              isHidden
-                                ? "border-gray-300 bg-muted hover:bg-gray-100 text-muted-foreground"
-                                : "border-green-600 bg-green-600 hover:bg-green-700 text-white"
+                              !isHidden
+                                ? "bg-green-600 hover:bg-green-700 border-green-600"
+                                : "hover:bg-gray-50"
                             }
                             transition-all duration-200
                           `}
