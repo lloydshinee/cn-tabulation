@@ -23,6 +23,7 @@ export async function PortionSection({ portion }: { portion: Portion }) {
     <AccordionItem
       value={`portion-${portion.id}`}
       className="border-l-4 border-l-green-500 p-4 bg-card rounded-lg"
+      id={`portion-${portion.id}`}
     >
       <AccordionTrigger>
         <span className="font-semibold">{portion.name}</span>

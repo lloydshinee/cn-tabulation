@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-import { getTeamTotals, round2 } from "../utils/compute.js";
+import { computePortionScore } from "../utils/compute.js";
 
 export const createPortion = async (req, res) => {
   const { name, description } = req.body;
@@ -19,87 +19,47 @@ export const getPortions = async (_req, res) => {
 };
 
 export const getPortionScores = async (req, res) => {
-  const { id } = req.params;
-  const portion = await prisma.portion.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      criterias: {
-        include: {
-          criterions: {
-            include: { scores: true },
-          },
-        },
+  try {
+    const { id, judgeId } = req.params;
+    const portionId = parseInt(id);
+    const judgeIdInt = parseInt(judgeId);
+
+    const portion = await prisma.portion.findUnique({
+      where: { id: portionId },
+      include: {
+        criterias: { include: { criterions: { include: { scores: true } } } },
       },
-    },
-  });
+    });
 
-  const allScores = await prisma.score.findMany();
-  const judgeIds = [...new Set(allScores.map((s) => s.userId))];
-  const teams = await prisma.team.findMany();
+    if (!portion) return res.status(404).json({ error: "Portion not found" });
 
-  const results = teams.map((team) => {
-    // average score across judges (rounded)
-    const avgScore = round2(
-      getTeamTotals([portion], allScores, team.id, judgeIds)[portion.id]
-    );
+    const teams = await prisma.team.findMany();
+    const allScores = await prisma.score.findMany({
+      where: { userId: judgeIdInt },
+    });
 
-    // per-judge breakdown
-    const judgeScores = judgeIds.map((judgeId) => {
-      let portionSubtotal = 0;
-
-      const criteriasBreakdown = portion.criterias.map((criteria) => {
-        let criteriaSubtotal = 0;
-
-        const rawScores = criteria.criterions.map((criterion) => {
-          const score = allScores.find(
-            (s) =>
-              s.criterionId === criterion.id &&
-              s.teamId === team.id &&
-              s.userId === judgeId
-          );
-
-          const rawValue = score ? score.value : 0;
-          const weighted = rawValue * (criterion.weight / 100);
-          criteriaSubtotal += weighted;
-
-          return {
-            criterionId: criterion.id,
-            description: criterion.description,
-            weight: criterion.weight,
-            rawValue: round2(rawValue),
-            weighted: round2(weighted),
-          };
-        });
-
-        // apply criteria weight
-        const criteriaWeighted = criteriaSubtotal * (criteria.weight / 100);
-        portionSubtotal += criteriaWeighted;
-
-        return {
-          criteriaId: criteria.id,
-          name: criteria.name,
-          subtotal: round2(criteriaSubtotal), // subtotal before criteria weight
-          weighted: round2(criteriaWeighted), // after applying criteria weight
-          rawScores,
-        };
-      });
-
+    const results = teams.map((team) => {
+      const { portionSubtotal, criteriaBreakdown } = computePortionScore(
+        portion,
+        allScores,
+        team.id,
+        judgeIdInt
+      );
       return {
-        judgeId,
-        criterias: criteriasBreakdown,
-        portionSubtotal: round2(portionSubtotal),
+        teamId: team.id,
+        teamName: team.name,
+        portionId: portion.id,
+        portionName: portion.name,
+        subtotal: portionSubtotal,
+        criteriaBreakdown,
       };
     });
 
-    return {
-      teamId: team.id,
-      teamName: team.name,
-      avgScore,
-      judgeScores,
-    };
-  });
-
-  res.json(results);
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 export const getAllPortionScores = async (req, res) => {

@@ -13,7 +13,7 @@ const router = Router();
 
 router.post("/", createPortion);
 router.get("/", getPortions);
-router.get("/:id/scores", getPortionScores);
+router.get("/:id/score/:judgeId", getPortionScores);
 router.get("/scores", getAllPortionScores);
 router.get("/:id", getPortionById);
 router.put("/:id", updatePortion);

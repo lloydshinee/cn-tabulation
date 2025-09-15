@@ -3,40 +3,40 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Portion } from "@/lib/globals";
 import axios from "axios";
 import { Check } from "lucide-react";
+import { User } from "next-auth";
 import React, { useEffect, useState } from "react";
 
-export default function PortionSelect({
-  selectedPortion,
-  changePortion,
+export default function JudgeSelect({
+  selectedJudge,
+  changeJudge,
 }: {
-  selectedPortion: Portion | null;
-  changePortion: (portion: Portion | null) => void;
+  selectedJudge: User | null;
+  changeJudge: (judge: User | null) => void;
 }) {
-  const [portions, setPortions] = useState<Portion[]>([]);
+  const [judges, setJudges] = useState<User[]>([]);
 
   useEffect(() => {
-    async function fetchPortions() {
+    async function fetchJudges() {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/portions`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/judges`
         );
-        setPortions(res.data);
+        setJudges(res.data);
       } catch (err) {
-        console.error("Failed to fetch portions:", err);
+        console.error("Failed to fetch judges:", err);
       }
     }
-    fetchPortions();
+    fetchJudges();
   }, []);
 
-  const handlePortionClick = (portion: Portion) => {
-    const isActive = portion.id == selectedPortion?.id;
+  const handleJudgeClick = (judge: User) => {
+    const isActive = judge.id == selectedJudge?.id;
     if (isActive) {
-      changePortion(null); // deactivate
+      changeJudge(null); // deactivate
     } else {
-      changePortion(portion); // activate
+      changeJudge(judge); // activate
     }
   };
 
@@ -44,22 +44,22 @@ export default function PortionSelect({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold">Portions</CardTitle>
+          <CardTitle className="text-xl font-semibold">Judges</CardTitle>
           <Badge variant="outline" className="text-xs">
-            {portions.length} available
+            {judges.length} available
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {portions.map((portion) => {
-            const isActive = portion.id == selectedPortion?.id;
+          {judges.map((judge) => {
+            const isActive = judge.id == selectedJudge?.id;
 
             return (
               <Button
-                key={portion.id}
-                onClick={() => handlePortionClick(portion)}
+                key={judge.id}
+                onClick={() => handleJudgeClick(judge)}
                 variant={isActive ? "default" : "outline"}
                 size="sm"
                 className={`
@@ -72,33 +72,21 @@ export default function PortionSelect({
                   transition-all duration-200
                 `}
               >
-                {/* Portion Info */}
+                {/* User Info */}
                 <div className="flex items-center gap-1.5 w-full">
                   <span className="font-medium text-sm truncate flex-1">
-                    {portion.name}
+                    {judge.fullName}
                   </span>
                   {isActive && <Check className="w-3 h-3 flex-shrink-0" />}
                 </div>
-
-                {portion.description && (
-                  <span
-                    className={`
-                      text-xs truncate max-w-full text-left
-                      ${isActive ? "text-green-100" : "text-muted-foreground"}
-                    `}
-                  >
-                    {portion.description}
-                  </span>
-                )}
               </Button>
             );
           })}
         </div>
-
         {/* Empty State */}
-        {portions.length === 0 && (
+        {judges.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">No portions available</p>
+            <p className="text-sm">No judges available</p>
           </div>
         )}
       </CardContent>

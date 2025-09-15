@@ -1,5 +1,4 @@
 import prisma from "../prisma/client.js";
-import { computeCriteriaScoreForTeam } from "../utils/compute.js";
 
 export const createCriteria = async (req, res) => {
   const { name, weight, portionId, description } = req.body;
@@ -47,55 +46,4 @@ export const deleteCriteria = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to delete criteria" });
   }
-};
-
-export const getCriteriaScores = async (req, res) => {
-  const { id } = req.params;
-
-  // Fetch criteria + its criterions + all scores
-  const criteria = await prisma.criteria.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      criterions: { include: { scores: true } },
-      portion: true,
-    },
-  });
-
-  if (!criteria) return res.status(404).json({ error: "Criteria not found" });
-
-  // Get all scores for these criterions
-  const allScores = criteria.criterions.flatMap((c) => c.scores);
-
-  // Get unique teamIds & judgeIds
-  const teamIds = [...new Set(allScores.map((s) => s.teamId))];
-  const judgeIds = [...new Set(allScores.map((s) => s.userId))];
-
-  // Compute totals
-  const results = [];
-  for (const teamId of teamIds) {
-    const team = await prisma.team.findUnique({ where: { id: teamId } });
-
-    const total = computeCriteriaScoreForTeam(
-      criteria,
-      allScores,
-      teamId,
-      judgeIds
-    );
-
-    results.push({
-      teamId,
-      teamName: team.name,
-      score: total,
-    });
-  }
-
-  // Sort by score desc
-  results.sort((a, b) => b.score - a.score);
-
-  res.json({
-    criteriaId: criteria.id,
-    criteriaName: criteria.name,
-    portion: criteria.portion.name,
-    results,
-  });
 };

@@ -37,6 +37,7 @@ export default function ScoringGrid({ teamId }: ScoringGridProps) {
               <AvatarImage
                 src={`${BACKEND_URL}${currentTeam.imageSrc}`}
                 alt={currentTeam.name}
+                className="object-cover"
               />
               <AvatarFallback className="text-lg font-semibold">
                 {currentTeam.name.charAt(0)}
