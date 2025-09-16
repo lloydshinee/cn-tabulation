@@ -59,16 +59,16 @@ export default function CriteriaControl() {
                   return (
                     <Button
                       key={criteria.id}
+                      variant={!isHidden ? "default" : "outline"}
                       onClick={() =>
                         isHidden
                           ? showCriteria(portion.id, criteria.id)
                           : hideCriteria(portion.id, criteria.id)
                       }
                       disabled={!scoring.start}
-                      variant="ghost"
                       className={`
                             rounded-lg border w-full sm:w-[10rem] md:w-[12rem]
-                            flex flex-col items-start gap-1 hover:bg-none
+                            flex flex-col items-start gap-1
                             overflow-hidden text-left p-3
                             ${
                               !isHidden
