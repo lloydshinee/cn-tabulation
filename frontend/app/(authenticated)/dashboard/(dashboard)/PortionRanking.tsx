@@ -74,9 +74,7 @@ export function PortionRanking({ portion }: { portion: Portion }) {
                   </span>
                   <span>{team.teamName}</span>
                 </span>
-                <span className="font-medium">
-                  {team.avgSubtotal.toFixed(2)}
-                </span>
+                <span className="font-medium">{team.avgSubtotal}</span>
               </li>
             ))}
           </ol>
@@ -105,9 +103,7 @@ export function PortionRanking({ portion }: { portion: Portion }) {
                           </span>
                           <span>{team.teamName}</span>
                         </span>
-                        <span className="font-medium">
-                          {team.avgSubtotal.toFixed(2)}
-                        </span>
+                        <span className="font-medium">{team.avgSubtotal}</span>
                       </li>
                     ))}
                   </ol>
