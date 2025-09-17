@@ -1,12 +1,25 @@
 import type { NextConfig } from "next";
+import ip from "ip"; // 👈 auto-detect LAN IP
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
-  ? new URL(process.env.NEXT_PUBLIC_BACKEND_URL).hostname
-  : "localhost";
+const address = ip.address();
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BACKEND_URL: `http://${address}:3001`,
+    NEXT_PUBLIC_SOCKET_URL: `http://${address}:3003`,
+  },
+  turbopack: {
+    root: __dirname,
+  },
   images: {
-    domains: [backendUrl],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: address,
+        port: "3001",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
